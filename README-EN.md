@@ -14,6 +14,6 @@ You can get the following information through this tool
 ----
 `MinecraftServerPing` need [FastJson](https://github.com/alibaba/fastjson) lib
 
-usage example Please refer to the [Main](https://github.com/MX233/MinecraftServerPing/blob/main/src/tax/Cute/Main.java)
+usage example Please refer to the [Main](https://github.com/MX233/MinecraftServerPing/blob/main/tax/cute/Main.java)
 
 :grin:
