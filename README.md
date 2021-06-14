@@ -14,6 +14,6 @@ MinecraftServerPing 是一个 Minecraft 服务器信息获取工具
 ----
 `MinecraftServerPing` 需要 [FastJson](https://github.com/alibaba/fastjson) 依赖
 
-使用示例请见 [Main](https://github.com/MX233/MinecraftServerPing/blob/main/src/tax/Cute/Main.java)
+使用示例请见 [Main](https://github.com/MX233/MinecraftServerPing/blob/main/src/tax/cute/Main.java)
 
 :grin:
