@@ -12,8 +12,10 @@ You can get the following information through this tool
 - `modinfo(Server type,ModList,ModCount)`
 - `Description`
 ----
-`MinecraftServerPing` need [FastJson](https://github.com/alibaba/fastjson) lib
+`MinecraftServerPing` need [FastJSON](https://github.com/alibaba/fastjson) lib
 
 usage example Please refer to the [Main](https://github.com/MX233/MinecraftServerPing/blob/main/tax/cute/Main.java)
+
+PS:If the server does not return some JSON object,you will get the`defaultValue` such as "-1" "null"
 
 :grin:
