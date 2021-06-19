@@ -12,8 +12,10 @@ MinecraftServerPing 是一个 Minecraft 服务器信息获取工具
 - `mod信息(服务器类型,Mod列表,Mod数量)`
 - `描述`
 ----
-`MinecraftServerPing` 需要 [FastJson](https://github.com/alibaba/fastjson) 依赖
+`MinecraftServerPing` 需要 [FastJSON](https://github.com/alibaba/fastjson) 依赖
 
 使用示例请见 [Main](https://github.com/MX233/MinecraftServerPing/blob/main/tax/cute/Main.java)
+
+PS:如果服务器不返回某些JSON对象 获取它时你将得到`默认值` 如"-1" "null"
 
 :grin:
