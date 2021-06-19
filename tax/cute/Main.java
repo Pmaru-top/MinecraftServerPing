@@ -1,4 +1,3 @@
-//Sometimes the server does not return some json and causes an error, please modify it yourself
 package tax.cute;
 
 import com.alibaba.fastjson.JSONArray;
@@ -7,29 +6,28 @@ import com.alibaba.fastjson.JSONObject;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException{
 //        usage example
-        mcping ping = mcping.getMotd("mc.hypixel.net", 25565);
-        System.out.println("ConnectionDelay:" + ping.getDelay() + "ms");
-        System.out.println("Description:" + ping.getDescription());
-        System.out.println("Version:" + ping.getVersion_name());
-        System.out.println("Players:" + ping.getOnline_players() + "/" + ping.getMax_players());
-        System.out.println("ModList:" + ping.getModList());
-        System.out.println("ModCount:" + ping.getMod_count());
-        System.out.println("Type:" + ping.getType());
+            MCping ping = MCping.getMotd("mc.hypixel.net", 25565);
+            System.out.println("ConnectionDelay:" + ping.getDelay() + "ms");
+            System.out.println("Description:" + ping.getDescription());
+            System.out.println("Version:" + ping.getVersion_name());
+            System.out.println("Players:" + ping.getOnline_players() + "/" + ping.getMax_players());
+            System.out.println("ModList:" + ping.getModList());
+            System.out.println("ModCount:" + ping.getMod_count());
+            System.out.println("Type:" + ping.getType());
 
-        boolean getFavicon = false; //You can choose whether to save the Favicon
-        String saveSrc = "\\Favicon.PNG";
-        if (getFavicon) Util.base64ToImage(ping.getFavicon(), saveSrc);
+            boolean getFavicon = false; //You can choose whether to save the Favicon
+            String saveSrc = "\\Favicon.PNG";
+            if (getFavicon) Util.base64ToImage(ping.getFavicon(), saveSrc);
     }
 }
 
-class mcping {
+class MCping {
     private String version_name;
     private String version_protocol;
     private int max_players;
@@ -41,7 +39,7 @@ class mcping {
     private int delay;
     private ArrayList<String> modList;
 
-    public mcping(
+    public MCping(
             String version_name,
             String version_protocol,
             int max_players,
@@ -65,8 +63,23 @@ class mcping {
         this.delay = delay;
     }
 
-    public static mcping getMotd(String host, int port) throws IOException {
+    public static MCping getMotd(String host, int port) throws IOException {
+        //initialization
+        ArrayList<String> modList = new ArrayList<>();
         String description = "";
+        JSONObject version_json;
+        String version_protocol = null;
+        String version_name = null;
+        JSONObject players_json;
+        int max_players = -1;
+        int online_players = -1;
+        int mod_count = 0;
+        String favicon = null;
+        String type = null;
+        JSONObject modinfo_json;
+        JSONArray modList_json;
+        JSONObject description_json;
+
 //        connection
         Socket socket = new Socket();
         socket.connect(new InetSocketAddress(host, port), 5000);
@@ -111,50 +124,64 @@ class mcping {
         out.close();
         in.close();
 
-        String data = new String(bytes, StandardCharsets.UTF_8);//get json
+        String data = new String(bytes,"UTF-8");//get json
         //json parsing
         JSONObject data_json = JSONObject.parseObject(data);
-        JSONObject version_json = data_json.getJSONObject("version");
-        String version_protocol = version_json.getString("protocol");
-        String version_name = version_json.getString("name");
 
-        JSONObject players_json = data_json.getJSONObject("players");
-        int max_players = players_json.getIntValue("max");
-        int online_players = players_json.getIntValue("online");
+        if (data_json.containsKey("version")) {
+            version_json = data_json.getJSONObject("version");
+            if (version_json.get("protocol") instanceof String) {
+                version_protocol = version_json.getString("protocol");
+            }
+            if (version_json.get("name") instanceof String) {
+                version_name = version_json.getString("name");
+            }
+        }
 
-        String favicon = data_json.getString("favicon").split(",")[1];
+        if (data_json.containsKey("players")) {
+            players_json = data_json.getJSONObject("players");
+            if (players_json.get("max") instanceof Integer) {
+                max_players = players_json.getIntValue("max");
+            }
+            if (players_json.get("online") instanceof Integer) {
+                online_players = players_json.getIntValue("online");
+            }
+        }
 
-        String type = null;
-        int mod_count = 0;
-        ArrayList<String> modList = new ArrayList<>();
+        if (data_json.get("favicon") instanceof String) {
+            favicon = data_json.getString("favicon").split(",")[1];
+        }
+
         if (data_json.containsKey("modinfo")) {
-            JSONObject modinfo_json = data_json.getJSONObject("modinfo");
+            modinfo_json = data_json.getJSONObject("modinfo");
             type = modinfo_json.getString("type");
-            JSONArray modList_json = modinfo_json.getJSONArray("modList");
+            modList_json = modinfo_json.getJSONArray("modList");
             mod_count = modList_json.size();
             for (int i = 0; i < modList_json.size(); i++) {
                 modList.add(modList_json.getJSONObject(i).getString("modid"));
             }
         }
 
-        if (data_json.get("description") instanceof String) {
-            description = data_json.getString("description");
-        } else {
-            JSONObject description_json = data_json.getJSONObject("description");
-            if (description_json.containsKey("extra")) {
-                JSONArray extra_array = description_json.getJSONArray("extra");
-                JSONObject text_json;
-                for (int i = 0; i < extra_array.size(); i++) {
-                    text_json = extra_array.getJSONObject(i);
-                    description += text_json.getString("text");
+        if (data_json.containsKey("description")) {
+            if (data_json.get("description") instanceof String) {
+                description = data_json.getString("description");
+            } else {
+                description_json = data_json.getJSONObject("description");
+                if (description_json.containsKey("extra")) {
+                    JSONArray extra_array = description_json.getJSONArray("extra");
+                    JSONObject text_json;
+                    for (int i = 0; i < extra_array.size(); i++) {
+                        text_json = extra_array.getJSONObject(i);
+                        description += text_json.getString("text");
+                    }
+                } else if (description_json.containsKey("text")) {
+                    description = description_json.getString("text");
                 }
-            } else if (description_json.containsKey("text")) {
-                description = description_json.getString("text");
-            }
 
+            }
         }
 
-        return new mcping(
+        return new MCping(
                 version_name,
                 version_protocol,
                 max_players,
