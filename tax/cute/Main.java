@@ -130,7 +130,7 @@ class MCping {
 
         if (data_json.containsKey("version")) {
             version_json = data_json.getJSONObject("version");
-            if (version_json.get("protocol") instanceof String) {
+            if (version_json.get("protocol") instanceof Integer) {
                 version_protocol = version_json.getString("protocol");
             }
             if (version_json.get("name") instanceof String) {
