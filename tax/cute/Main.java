@@ -6,8 +6,11 @@ import javax.imageio.ImageIO;
 public class Main {
     public static void main(String[] args) throws IOException{
 		// usage example
-    	String host = "我的世界.games";
-    	int port = 831;
+		// here is a chinese domain "鎴戠殑涓栫晫.games:831" to test.
+    	
+		String host = "mc.hypixel.net";
+    	int port = 25565;
+		
     	System.out.println("Now pinging " + host + ":" + port);
         MCPing ping = MCPing.getMotd(host, port);
         System.out.println("ConnectionDelay:" + ping.getDelay() + "ms");
