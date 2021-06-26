@@ -60,6 +60,7 @@ public class Punycode {
 				b++;
 			}
 		}
+		if(b >= input.length()) return output.toString();
 		if (b > 0) {
 			output.append(DELIMITER);
 		}
