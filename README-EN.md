@@ -14,7 +14,9 @@ You can get the following information through this tool
 ----
 `MinecraftServerPing` need [FastJSON](https://github.com/alibaba/fastjson) lib
 
-usage example Please refer to the [Main](https://github.com/MX233/MinecraftServerPing/blob/main/tax/cute/Main.java)
+usage example Please refer to the [Main](https://github.com/MX233/MinecraftServerPing/blob/main/tax/cute/minecraftserverping/Main.java)
+
+You can download and use the file in [``Releases``](https://github.com/MX233/MinecraftServerPing/releases), it is a lib
 
 PS:If the server does not return some JSON object,you will get the`defaultValue` such as "-1" "null"
 
