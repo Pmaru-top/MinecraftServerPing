@@ -107,7 +107,6 @@ public class MCPing {
         socket.close();
         
         String data = new String(bytes,"UTF-8"); // get json
-        System.out.println(data);
         // json parsing
         JSONObject data_json = JSONObject.parseObject(data);
 
