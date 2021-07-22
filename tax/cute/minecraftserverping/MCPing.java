@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MCPing {
     private String version_name;
@@ -18,9 +19,9 @@ public class MCPing {
     private String type;
     private int mod_count;
     private int delay;
-    private ArrayList<String> modList;
-	
-	// this constructor don't need to public
+    private List<String> modList;
+
+    // this constructor don't need to public
     private MCPing(
             String version_name,
             String version_protocol,
@@ -31,7 +32,7 @@ public class MCPing {
             String type,
             int mod_count,
             int delay,
-            ArrayList<String> modList
+            List<String> modList
     ) {
         this.version_name = version_name;
         this.version_protocol = version_protocol;
@@ -44,29 +45,26 @@ public class MCPing {
         this.modList = modList;
         this.delay = delay;
     }
-    
-    public static MCPing getMotd(String host, int port) throws IOException{
-    	return MCPing.getMotd(host, port, 5000);
+
+    public static MCPing getMotd(String host, int port) throws IOException {
+        return MCPing.getMotd(host, port, 5000);
     }
 
     public static MCPing getMotd(String host, int port, int timeout) throws IOException {
         // initialization
-        ArrayList<String> modList = new ArrayList<>();
-        String description = "";
+        List<String> modList = new ArrayList<>();
         JSONObject version_json;
-        String version_protocol = null;
-        String version_name = null;
+        String description = "";
+        String version_protocol = "null";
+        String version_name = "null";
+        String favicon = "null";
+        String type = "null";
         JSONObject players_json;
         int max_players = -1;
         int online_players = -1;
         int mod_count = 0;
-        String favicon = null;
-        String type = null;
-        JSONObject modinfo_json;
-        JSONArray modList_json;
-        JSONObject description_json;
 
-		// connection
+        // connection
         Socket socket = new Socket();
 
         String _encode_host = Punycode.encodeURL(host);
@@ -105,8 +103,8 @@ public class MCPing {
         out.close();
         in.close();
         socket.close();
-        
-        String data = new String(bytes,"UTF-8"); // get json
+
+        String data = new String(bytes, "UTF-8"); // get json
         // json parsing
         JSONObject data_json = JSONObject.parseObject(data);
 
@@ -121,46 +119,66 @@ public class MCPing {
         }
 
         if (data_json.containsKey("players")) {
-            players_json = data_json.getJSONObject("players");
-            if (players_json.get("max") instanceof Integer) {
-                max_players = players_json.getIntValue("max");
-            }
-            if (players_json.get("online") instanceof Integer) {
-                online_players = players_json.getIntValue("online");
+            if (data_json.get("players") instanceof JSONObject) {
+                players_json = data_json.getJSONObject("players");
+                if (players_json.get("max") instanceof Integer) {
+                    max_players = players_json.getInteger("max");
+                }
+
+                if (players_json.get("online") instanceof Integer) {
+                    online_players = players_json.getIntValue("online");
+                }
             }
         }
 
-        if (data_json.get("favicon") instanceof String) {
-            favicon = data_json.getString("favicon").split(",")[1];
+        if (data_json.containsKey("favicon")) {
+            if (data_json.get("favicon") instanceof String) {
+                favicon = data_json.getString("favicon").split(",")[1];
+            }
         }
 
         if (data_json.containsKey("modinfo")) {
-            modinfo_json = data_json.getJSONObject("modinfo");
-            type = modinfo_json.getString("type");
-            modList_json = modinfo_json.getJSONArray("modList");
-            mod_count = modList_json.size();
-            for (int i = 0; i < modList_json.size(); i++) {
-                modList.add(modList_json.getJSONObject(i).getString("modid"));
-            }
-        }
+            if (data_json.get("modinfo") instanceof JSONObject) {
+                JSONObject modinfo_json = data_json.getJSONObject("modinfo");
 
-        if (data_json.containsKey("description")) {
-            if (data_json.get("description") instanceof String) {
-                description = data_json.getString("description");
-            } else {
-                description_json = data_json.getJSONObject("description");
-                if (description_json.containsKey("text")) {
-                    description = description_json.getString("text");
+                if (modinfo_json.get("type") instanceof String) {
+                    type = modinfo_json.getString("type");
                 }
-                if (description_json.containsKey("extra")) {
-                    JSONArray extra_array = description_json.getJSONArray("extra");
-                    JSONObject text_json;
-                    for (int i = 0; i < extra_array.size(); i++) {
-                        text_json = extra_array.getJSONObject(i);
-                        description += text_json.getString("text");
+
+                if (modinfo_json.get("modList") instanceof JSONArray) {
+                    JSONArray modList_json = modinfo_json.getJSONArray("modList");
+                    mod_count = modList_json.size();
+                    for (int i = 0; i < modList_json.size(); i++) {
+                        modList.add(modList_json.getJSONObject(i).getString("modid"));
                     }
                 }
             }
+        }
+
+        try {
+            if (data_json.containsKey("description")) {
+                if (data_json.get("description") instanceof String) {
+                    description = data_json.getString("description");
+                } else if (data_json.get("description") instanceof JSONObject) {
+                    JSONObject description_json = data_json.getJSONObject("description");
+                    if (description_json.containsKey("text")) {
+                        description = description_json.getString("text");
+                    }
+                    if (description_json.containsKey("extra")) {
+                        JSONArray extra_array = description_json.getJSONArray("extra");
+                        JSONObject text_json;
+                        for (int i = 0; i < extra_array.size(); i++) {
+                            text_json = extra_array.getJSONObject(i);
+                            if (text_json.containsKey("text")) {
+                                description += text_json.getString("text");
+                            }
+                        }
+                    }
+
+                }
+            }
+        } catch (NullPointerException e) {
+            description = "null";
         }
 
         return new MCPing(
@@ -210,7 +228,7 @@ public class MCPing {
         return this.mod_count;
     }
 
-    public ArrayList<String> getModList() {
+    public List<String> getModList() {
         return this.modList;
     }
 
